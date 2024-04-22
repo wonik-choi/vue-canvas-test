@@ -16,6 +16,7 @@ const firebaseConfig = {
 initializeApp(firebaseConfig);
 
 const messaging = getMessaging();
+
 onMessage(messaging, (payload) => {
     console.log("Message received. ", payload);
     // ...
