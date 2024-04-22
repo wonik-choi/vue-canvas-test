@@ -8,10 +8,6 @@ const router = createRouter({
     routes: [
         {
             path: "/",
-            redirect: "/main",
-        },
-        {
-            path: "/main",
             name: "main",
             component: () => import("@/views/MainPage.vue"),
             meta: {
