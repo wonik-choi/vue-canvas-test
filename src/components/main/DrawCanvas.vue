@@ -41,6 +41,7 @@ const tools = ref([
 ]);
 const historyLines = ref<Konva.Line[]>([]);
 const saveProblems = ref<number[]>([]);
+const isAllProblemSolved = ref<boolean>(false);
 
 // props 에 따른 문제 path 설정
 const problemImagePath = computed(() => {
@@ -52,13 +53,27 @@ const isCurrentProblemStudyDataExist = computed(() => {
     // return 문 내에 바로 조건을 넣어주면, 인식을 하지 못합니다..
     const storageCondition = localStorage.getItem(`study-step-${props.selectedProblemIndex}`);
     const saveProblemCondition = saveProblems.value.includes(props.selectedProblemIndex);
-    return storageCondition || saveProblemCondition;
+    return storageCondition && saveProblemCondition;
 });
 
 // 모든 문제가 풀렸다면, 상위 컴포넌트에게 emit
-const emitAllProblemSolved = computed(() => {
-    return [1, 2, 3].every((index) => localStorage.getItem(`study-step-${index}`) !== null);
-});
+const checkAllProblemSolving = () => {
+    const condition = [1, 2, 3].every(
+        (index) => localStorage.getItem(`study-step-${index}`) !== null,
+    );
+    isAllProblemSolved.value = condition;
+    return;
+};
+
+// 풀려있는 문제에 한하여 저장된 데이터를 불러옵니다.
+const loadAllStudyStep = () => {
+    [1, 2, 3].forEach((index) => {
+        const existStudyData = localStorage.getItem(`study-step-${index}`);
+        if (existStudyData) {
+            saveProblems.value.push(index);
+        }
+    });
+};
 
 const adjustPenTool = () => {
     mode.value = true;
@@ -211,7 +226,7 @@ const saveStudyStep = () => {
     localStorage.setItem(`study-step-${props.selectedProblemIndex}`, data);
     // index를 저장합니다.
     saveProblems.value.push(props.selectedProblemIndex);
-    console.log(saveProblems.value);
+    checkAllProblemSolving();
 };
 
 const loadStudyStep = () => {
@@ -238,10 +253,14 @@ const completeSolvingProblem = () => {
 const deleteStudyStep = () => {
     localStorage.removeItem(`study-step-${props.selectedProblemIndex}`);
     saveProblems.value.splice(props.selectedProblemIndex - 1, 1);
+    checkAllProblemSolving();
 };
 
 // 모든 문제를 다 풀었다면 제출하기
 const submitAllProblem = () => {
+    [1, 2, 3].forEach((index) => {
+        localStorage.removeItem(`study-step-${index}`);
+    });
     emits("emit-all-problem-solved");
 };
 
@@ -258,6 +277,7 @@ watch(
     () => {
         layer.value?.destroyChildren(); // 우선 현 layer 를 초기화 합니다.
         loadStudyStep(); // 이후 저장되어 있는 풀이 과정을 불러옵니다. (있다면)
+        checkAllProblemSolving();
     },
 );
 
@@ -294,6 +314,8 @@ onMounted(() => {
     );
     // index 에 맞는 문제 이미지를 렌더링 합니다. (첫 마운트 시)
     useMountProblemImage(problemImagePath.value, problemLayer.value as Konva.Layer);
+    checkAllProblemSolving(); // 모든 문제가 풀렸는지 확인합니다.
+    loadAllStudyStep(); // 저장된 데이터를 불러옵니다.
 });
 </script>
 
@@ -325,7 +347,7 @@ onMounted(() => {
                     @click="completeSolvingProblem"
                 />
                 <BaseButton
-                    v-if="emitAllProblemSolved"
+                    v-if="isAllProblemSolved"
                     :type="'button'"
                     :value="'submit'"
                     :color="'primary'"
