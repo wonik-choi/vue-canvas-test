@@ -15,7 +15,7 @@ const emitToolButtonClick = () => {
 </script>
 
 <template>
-    <div class="w-fit h-fit">
+    <div class="w-fit h-fit flex flex-col justify-center items-center gap-[1rem]">
         <BaseButton
             :type="'button'"
             :color="'normal'"

@@ -27,19 +27,19 @@ const layer = ref<null | Konva.Layer>(null);
 const problemLayer = ref<null | Konva.Layer>(null);
 
 const tools = ref([
-    "pen",
-    "eraser",
-    "toggleEraserMode", // "objectEraser" 로 변경
-    "offDraw",
-    "onDraw",
+    "펜",
+    "지우개",
+    "지우개방식변경", // "objectEraser" 로 변경
+    "그리기Off",
+    "그리기On",
     "undo",
     "redo",
-    "+1 width",
-    "-1 width",
-    "red",
-    "blue",
-    "black",
-    "clear",
+    "+1 펜두께",
+    "-1 펜두께",
+    "빨간색",
+    "파란색",
+    "검정색",
+    "모두삭제",
 ]);
 const historyLines = ref<Konva.Line[]>([]);
 const saveProblems = ref<number[]>([]);
@@ -171,18 +171,18 @@ const resetDrawListner = () => {
 
 const adjustDrawingTool = (toolName: string) => {
     switch (toolName) {
-        case "pen":
+        case "펜":
             adjustPenTool();
             resetDrawListner();
             return;
-        case "eraser":
+        case "지우개":
             adjustEraserTool();
             resetDrawListner();
             return;
-        case "offDraw":
+        case "그리기Off":
             adjustOffDrawTool();
             return;
-        case "onDraw":
+        case "그리기On":
             adjustOnDrawTool();
             return;
         case "undo":
@@ -193,31 +193,31 @@ const adjustDrawingTool = (toolName: string) => {
             adjustRedoTool();
             resetDrawListner();
             return;
-        case "+1 width":
+        case "+1 펜두께":
             adjustPlusWidthTool();
             resetDrawListner();
             return;
-        case "-1 width":
+        case "-1 펜두께":
             adjustMinusWidthTool();
             resetDrawListner();
             return;
-        case "red":
+        case "빨간색":
             adjustRedLineTool();
             resetDrawListner();
             return;
-        case "blue":
+        case "파란색":
             adjustBlueLineTool();
             resetDrawListner();
             return;
-        case "black":
+        case "검정색":
             adjustBlackLineTool();
             resetDrawListner();
             return;
-        case "clear":
+        case "모두삭제":
             adjustClearTool();
             resetDrawListner();
             return;
-        case "toggleEraserMode":
+        case "지우개방식변경":
             adjustObjectEraser();
             resetDrawListner();
             return;

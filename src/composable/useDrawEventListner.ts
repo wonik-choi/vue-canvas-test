@@ -24,7 +24,7 @@ const useDrawEventListener = (
         isPaint.value = true;
         const pos = stage?.getPointerPosition();
         if (objectDelete && !brushMode) {
-            if (!(e.target instanceof Konva.Stage)) destoryLine(e);
+            destoryLine(e);
         } else {
             if (pos) {
                 lastLine.value = new Konva.Line({
@@ -45,12 +45,12 @@ const useDrawEventListener = (
     };
 
     const draw = (e: KonvaEventObject<any>) => {
+        if (!isPaint.value) {
+            return;
+        }
         if (objectDelete && !brushMode) {
-            if (!(e.target instanceof Konva.Stage)) destoryLine(e);
+            destoryLine(e);
         } else {
-            if (!isPaint.value) {
-                return;
-            }
             const pos = stage?.getPointerPosition();
             if (pos) {
                 const newPoints = lastLine.value?.points().concat([pos?.x, pos.y]);
