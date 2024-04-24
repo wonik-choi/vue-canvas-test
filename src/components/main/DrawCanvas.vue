@@ -17,6 +17,7 @@ const emits = defineEmits<{
 }>();
 
 const mode = ref<boolean>(true);
+const objectDelete = ref<boolean>(false);
 const line = ref<Pick<Konva.LineConfig, "stroke" | "strokeWidth">>({
     stroke: "black",
     strokeWidth: 2,
@@ -28,6 +29,7 @@ const problemLayer = ref<null | Konva.Layer>(null);
 const tools = ref([
     "pen",
     "eraser",
+    "toggleEraserMode", // "objectEraser" 로 변경
     "offDraw",
     "onDraw",
     "undo",
@@ -98,6 +100,7 @@ const adjustOnDrawTool = () => {
             layer.value as Konva.Layer,
             mode.value,
             line.value,
+            objectDelete.value,
         );
     }
 };
@@ -124,7 +127,7 @@ const adjustRedoTool = () => {
 
 const adjustPlusWidthTool = () => {
     if (!line.value.strokeWidth) return;
-    if (line.value.strokeWidth < 10 && line.value.strokeWidth >= 1) {
+    if (line.value.strokeWidth < 10 && line.value.strokeWidth >= 2) {
         line.value.strokeWidth += 1;
     } else {
         line.value.strokeWidth = 10;
@@ -133,10 +136,10 @@ const adjustPlusWidthTool = () => {
 
 const adjustMinusWidthTool = () => {
     if (!line.value.strokeWidth) return;
-    if (line.value.strokeWidth <= 10 && line.value.strokeWidth > 1) {
+    if (line.value.strokeWidth <= 10 && line.value.strokeWidth > 2) {
         line.value.strokeWidth -= 1;
     } else {
-        line.value.strokeWidth = 1;
+        line.value.strokeWidth = 2;
     }
 };
 
@@ -156,13 +159,25 @@ const adjustClearTool = () => {
     layer.value?.destroyChildren();
 };
 
+const adjustObjectEraser = () => {
+    objectDelete.value = !objectDelete.value;
+};
+
+const resetDrawListner = () => {
+    console.log(objectDelete.value, mode.value);
+    adjustOffDrawTool();
+    adjustOnDrawTool();
+};
+
 const adjustDrawingTool = (toolName: string) => {
     switch (toolName) {
         case "pen":
             adjustPenTool();
+            resetDrawListner();
             return;
         case "eraser":
             adjustEraserTool();
+            resetDrawListner();
             return;
         case "offDraw":
             adjustOffDrawTool();
@@ -172,27 +187,39 @@ const adjustDrawingTool = (toolName: string) => {
             return;
         case "undo":
             adjustUndoTool();
+            resetDrawListner();
             return;
         case "redo":
             adjustRedoTool();
+            resetDrawListner();
             return;
         case "+1 width":
             adjustPlusWidthTool();
+            resetDrawListner();
             return;
         case "-1 width":
             adjustMinusWidthTool();
+            resetDrawListner();
             return;
         case "red":
             adjustRedLineTool();
+            resetDrawListner();
             return;
         case "blue":
             adjustBlueLineTool();
+            resetDrawListner();
             return;
         case "black":
             adjustBlackLineTool();
+            resetDrawListner();
             return;
         case "clear":
             adjustClearTool();
+            resetDrawListner();
+            return;
+        case "toggleEraserMode":
+            adjustObjectEraser();
+            resetDrawListner();
             return;
         default:
             return;
@@ -311,6 +338,7 @@ onMounted(() => {
         layer.value as Konva.Layer,
         mode.value,
         line.value,
+        objectDelete.value,
     );
     // index 에 맞는 문제 이미지를 렌더링 합니다. (첫 마운트 시)
     useMountProblemImage(problemImagePath.value, problemLayer.value as Konva.Layer);
