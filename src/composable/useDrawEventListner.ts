@@ -48,6 +48,8 @@ const useDrawEventListener = (
         if (!isPaint.value) {
             return;
         }
+
+        e.evt.preventDefault();
         if (objectDelete && !brushMode) {
             destoryLine(e);
         } else {
