@@ -41,7 +41,7 @@ const tools = ref([
     "검정색",
     "모두삭제",
 ]);
-const historyLines = ref<Konva.Line[]>([]);
+const historyLines = ref<(Konva.Line | Konva.Line[])[]>([]);
 const saveProblems = ref<number[]>([]);
 const isAllProblemSolved = ref<boolean>(false);
 
@@ -106,23 +106,43 @@ const adjustOnDrawTool = () => {
 };
 
 const adjustUndoTool = () => {
-    if (layer.value?.children.length) {
-        const lastLine = layer.value?.children.pop();
+    if (layer.value?.children.length === 0) return;
+
+    const lastLine = layer.value?.children.pop();
+
+    if (Array.isArray(lastLine)) {
+        lastLine.forEach((line) => {
+            if (line instanceof Konva.Line) {
+                historyLines.value.push(line);
+            }
+        });
+    } else {
         if (lastLine instanceof Konva.Line) {
             historyLines.value.push(lastLine);
         }
-        layer.value?.draw();
     }
+
+    layer.value?.draw();
 };
 
 const adjustRedoTool = () => {
-    if (historyLines.value.length) {
-        const firstRedoLine = historyLines.value.pop();
+    if (historyLines.value.length === 0) return;
+
+    const firstRedoLine = historyLines.value.pop();
+
+    if (Array.isArray(firstRedoLine)) {
+        firstRedoLine.forEach((line) => {
+            if (line instanceof Konva.Line) {
+                layer.value?.children.push(line);
+            }
+        });
+    } else {
         if (firstRedoLine instanceof Konva.Line) {
             layer.value?.children.push(firstRedoLine);
         }
-        layer.value?.draw();
     }
+
+    layer.value?.draw();
 };
 
 const adjustPlusWidthTool = () => {
@@ -156,6 +176,15 @@ const adjustBlackLineTool = () => {
 };
 
 const adjustClearTool = () => {
+    const layerHistroies: Konva.Line[] = [];
+    if (layer.value?.children.length) {
+        layer.value?.children.forEach((child) => {
+            if (child instanceof Konva.Line) {
+                layerHistroies.push(child);
+            }
+        });
+    }
+    historyLines.value.push(layerHistroies); // 전체 배열을 저장합니다.
     layer.value?.destroyChildren();
 };
 
@@ -344,6 +373,24 @@ onMounted(() => {
     useMountProblemImage(problemImagePath.value, problemLayer.value as Konva.Layer);
     checkAllProblemSolving(); // 모든 문제가 풀렸는지 확인합니다.
     loadAllStudyStep(); // 저장된 데이터를 불러옵니다.
+
+    stage.value.on("mouseenter", () => {
+        useDrawEventListner(
+            stage.value as Konva.Stage,
+            layer.value as Konva.Layer,
+            mode.value,
+            line.value,
+            objectDelete.value,
+        );
+    });
+
+    stage.value.on("mouseleave", () => {
+        if (stage.value) {
+            stage.value.off("mousedown touchstart");
+            stage.value.off("mouseup touchednd");
+            stage.value.off("mousemove touchmove");
+        }
+    });
 });
 </script>
 
