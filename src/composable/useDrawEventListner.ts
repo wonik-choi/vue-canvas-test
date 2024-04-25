@@ -22,7 +22,12 @@ const useDrawEventListener = (
         const type = e.target;
         if (type instanceof Konva.Line) {
             historyLine.push(type); // history 내 저장
-            type.destroy();
+            lineLayer?.children.forEach((line) => {
+                if (line._id === type._id) {
+                    lineLayer.children.splice(lineLayer.children.indexOf(line), 1);
+                    lineLayer.draw();
+                }
+            });
         }
         return;
     };

@@ -108,7 +108,6 @@ const adjustOnDrawTool = () => {
 
 const adjustUndoTool = () => {
     if (layer.value?.children.length === 0) return;
-    console.log(historyLines.value);
 
     const lastLine = layer.value?.children.pop();
 
@@ -129,7 +128,6 @@ const adjustUndoTool = () => {
 
 const adjustRedoTool = () => {
     if (historyLines.value.length === 0) return;
-    console.log(historyLines.value);
     const firstRedoLine = historyLines.value.pop();
 
     if (Array.isArray(firstRedoLine)) {
@@ -178,16 +176,23 @@ const adjustBlackLineTool = () => {
 };
 
 const adjustClearTool = () => {
+    if (layer.value?.children.length === 0) return;
+
     const layerHistroies: Konva.Line[] = [];
-    if (layer.value?.children.length) {
+    const length = layer.value?.children.length;
+    if (length) {
         layer.value?.children.forEach((child) => {
             if (child instanceof Konva.Line) {
                 layerHistroies.push(child);
             }
         });
+        for (let i = 0; i < length; i++) {
+            layer.value?.children.splice(0, 1);
+        }
     }
     historyLines.value.push(layerHistroies); // 전체 배열을 저장합니다.
-    layer.value?.destroyChildren();
+
+    layer.value?.draw();
 };
 
 const adjustObjectEraser = () => {
