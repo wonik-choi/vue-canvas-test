@@ -18,6 +18,8 @@ const emits = defineEmits<{
 
 const mode = ref<boolean>(true);
 const objectDelete = ref<boolean>(false);
+const pencilStroke = ref<number>(2);
+const eraserStroke = ref<number>(5);
 const line = ref<Pick<Konva.LineConfig, "stroke" | "strokeWidth">>({
     stroke: "black",
     strokeWidth: 2,
@@ -79,10 +81,12 @@ const loadAllStudyStep = () => {
 
 const adjustPenTool = () => {
     mode.value = true;
+    line.value.strokeWidth = pencilStroke.value;
 };
 
 const adjustEraserTool = () => {
     mode.value = false;
+    line.value.strokeWidth = eraserStroke.value;
 };
 
 const adjustOffDrawTool = () => {
@@ -150,21 +154,39 @@ const adjustRedoTool = () => {
 };
 
 const adjustPlusWidthTool = () => {
-    if (!line.value.strokeWidth) return;
-    if (line.value.strokeWidth < 10 && line.value.strokeWidth >= 2) {
-        line.value.strokeWidth += 1;
+    if (mode.value) {
+        if (pencilStroke.value < 10 && pencilStroke.value >= 2) {
+            pencilStroke.value += 1;
+        } else {
+            pencilStroke.value = 10;
+        }
     } else {
-        line.value.strokeWidth = 10;
+        if (eraserStroke.value < 10 && eraserStroke.value >= 2) {
+            eraserStroke.value += 1;
+        } else {
+            eraserStroke.value = 10;
+        }
     }
+
+    line.value.strokeWidth = mode.value ? pencilStroke.value : eraserStroke.value;
 };
 
 const adjustMinusWidthTool = () => {
-    if (!line.value.strokeWidth) return;
-    if (line.value.strokeWidth <= 10 && line.value.strokeWidth > 2) {
-        line.value.strokeWidth -= 1;
+    if (mode.value) {
+        if (pencilStroke.value <= 10 && pencilStroke.value > 2) {
+            pencilStroke.value -= 1;
+        } else {
+            pencilStroke.value = 2;
+        }
     } else {
-        line.value.strokeWidth = 2;
+        if (eraserStroke.value <= 10 && eraserStroke.value > 2) {
+            eraserStroke.value -= 1;
+        } else {
+            eraserStroke.value = 2;
+        }
     }
+
+    line.value.strokeWidth = mode.value ? pencilStroke.value : eraserStroke.value;
 };
 
 const adjustRedLineTool = () => {
