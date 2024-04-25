@@ -101,12 +101,14 @@ const adjustOnDrawTool = () => {
             mode.value,
             line.value,
             objectDelete.value,
+            historyLines.value as (Konva.Line | Konva.Line[])[],
         );
     }
 };
 
 const adjustUndoTool = () => {
     if (layer.value?.children.length === 0) return;
+    console.log(historyLines.value);
 
     const lastLine = layer.value?.children.pop();
 
@@ -127,7 +129,7 @@ const adjustUndoTool = () => {
 
 const adjustRedoTool = () => {
     if (historyLines.value.length === 0) return;
-
+    console.log(historyLines.value);
     const firstRedoLine = historyLines.value.pop();
 
     if (Array.isArray(firstRedoLine)) {
@@ -193,7 +195,6 @@ const adjustObjectEraser = () => {
 };
 
 const resetDrawListner = () => {
-    console.log(objectDelete.value, mode.value);
     adjustOffDrawTool();
     adjustOnDrawTool();
 };
@@ -216,11 +217,9 @@ const adjustDrawingTool = (toolName: string) => {
             return;
         case "undo":
             adjustUndoTool();
-            resetDrawListner();
             return;
         case "redo":
             adjustRedoTool();
-            resetDrawListner();
             return;
         case "+1 펜두께":
             adjustPlusWidthTool();
@@ -351,6 +350,9 @@ onMounted(() => {
         height: 700,
     });
 
+    const container = document.getElementById("container");
+    container?.classList.add("drawEvent");
+
     layer.value = new Konva.Layer();
     problemLayer.value = new Konva.Layer();
 
@@ -362,34 +364,21 @@ onMounted(() => {
     problemLayer.value.moveToBottom(); // 이미지 layer 를 맨 아래로 보냅니다.
 
     // drag start, drawing, end 이벤트를 등록합니다.
-    useDrawEventListner(
+    const { outCanvas } = useDrawEventListner(
         stage.value as Konva.Stage,
         layer.value as Konva.Layer,
         mode.value,
         line.value,
         objectDelete.value,
+        historyLines.value as (Konva.Line | Konva.Line[])[],
     );
     // index 에 맞는 문제 이미지를 렌더링 합니다. (첫 마운트 시)
     useMountProblemImage(problemImagePath.value, problemLayer.value as Konva.Layer);
     checkAllProblemSolving(); // 모든 문제가 풀렸는지 확인합니다.
     loadAllStudyStep(); // 저장된 데이터를 불러옵니다.
 
-    stage.value.on("mouseenter", () => {
-        useDrawEventListner(
-            stage.value as Konva.Stage,
-            layer.value as Konva.Layer,
-            mode.value,
-            line.value,
-            objectDelete.value,
-        );
-    });
-
     stage.value.on("mouseleave", () => {
-        if (stage.value) {
-            stage.value.off("mousedown touchstart");
-            stage.value.off("mouseup touchednd");
-            stage.value.off("mousemove touchmove");
-        }
+        outCanvas();
     });
 });
 </script>
