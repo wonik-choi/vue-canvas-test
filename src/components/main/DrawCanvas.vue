@@ -95,7 +95,7 @@ const adjustOffDrawTool = () => {
 
 const adjustOnDrawTool = () => {
     if (stage.value) {
-        useDrawEventListner(
+        const { outCanvas } = useDrawEventListner(
             stage.value as Konva.Stage,
             layer.value as Konva.Layer,
             mode.value,
@@ -103,6 +103,10 @@ const adjustOnDrawTool = () => {
             objectDelete.value,
             historyLines.value as (Konva.Line | Konva.Line[])[],
         );
+        stage.value.off("mouseleave");
+        stage.value.on("mouseleave", () => {
+            outCanvas();
+        });
     }
 };
 
@@ -354,9 +358,6 @@ onMounted(() => {
         width: 500,
         height: 700,
     });
-
-    const container = document.getElementById("container");
-    container?.classList.add("drawEvent");
 
     layer.value = new Konva.Layer();
     problemLayer.value = new Konva.Layer();

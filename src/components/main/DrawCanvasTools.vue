@@ -10,7 +10,6 @@ const emits = defineEmits<{
 }>();
 
 const emitsToolButtonClick = (toolName: string) => {
-    console.log("중간", toolName);
     emits("emit-tool-button-click", toolName);
 };
 </script>
